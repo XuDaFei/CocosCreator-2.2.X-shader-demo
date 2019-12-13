@@ -6,7 +6,7 @@
 
 [查看demo代码](https://github.com/XuDaFei/CocosCreator-2.2.X-shader-demo)
 
-![shader使用流程](readme_pic/shader.png)  
+![shader使用流程](/readme_pic/shader.png)  
 ## 新建 shader 资源
 ### 编辑器中:  
 在 Creator 中新建所需的 matrial、effect, 并且在 material 中设置对应的 effct 资源
@@ -159,7 +159,7 @@ export default class ShaderTime extends cc.Component
 }
 ```
 ## 关于合图导致web和模拟器显示不一致的BUG
-![合图错误](readme_pic/hetucuowu.png)  
+![合图错误](/readme_pic/hetucuowu.png)  
 原因: Cocos 会把小于512*512的碎图自动合图以减少DrawCall，而effect中接收到的uv 坐标是整个合图的uv,  导致需要用到uv坐标的effect在自动合图下显示不正确。
 解决办法：
 - 关闭自动合图
