@@ -1,0 +1,17 @@
+{
+  "ver": "1.0.23",
+  "uuid": "ae91e5d2-7d0a-41f4-a4fa-ffe0037ff8a0",
+  "compiledShaders": [
+    {
+      "glsl1": {
+        "vert": "uniform mat4 cc_matViewProj;\n\nprecision highp float;\n\nattribute vec3 a_position;\n\nattribute vec2 a_uv0;\n\nvarying vec2 uv0;\n\nvoid main () {\n  gl_Position = cc_matViewProj * vec4(a_position, 1);\n  uv0 = a_uv0;\n}\n",
+        "frag": "\nprecision highp float;\n\nvarying vec2 uv0;\nuniform sampler2D texture;\nuniform vec4 UVoffset;\nuniform float u_time;\nuniform float rotated;\nvoid main()\n{\n  float u_time = u_time * .5+5.;\n  vec2 UVnormalize;\n  UVnormalize.x = (uv0.x-UVoffset.x)/(UVoffset.z-UVoffset.x);\n  UVnormalize.y = (uv0.y-UVoffset.y)/(UVoffset.w-UVoffset.y);\n  if(rotated > 0.5)\n  {\n    float temp = UVnormalize.x;\n    UVnormalize.x = UVnormalize.y;\n    UVnormalize.y = 1.0 - temp;\n  }\n\n  vec2 uv = uv0.xy;\n\n  vec2 p = mod(uv*6.12, 6.12)-250.0;\n\n  vec2 i = vec2(p);\n  float c = 1.0;\n  float inten = .0065;\n\n  for (int n = 0; n < 5; n++) \n  {\n    float t =  u_time * (1.0 - (3.5 / float(n+1)));\n    i = p + vec2(cos(t - i.x) + sin(t + i.y), sin(t - i.y) + cos(1.5*t + i.x));\n    c += 1.0/length(vec2(p.x / (cos(i.x+t)/inten),p.y / (cos(i.y+t)/inten)));\n  }\n  c /= float(5);\n  c = 1.17-pow(c, 1.4);\n  vec4 tex = texture2D(texture,uv0);\n  vec3 colour = vec3(pow(abs(c), 20.0));\n  colour = clamp(colour + vec3(0.0, 0.0, .0), 0.0, tex.a);\n\n  float alpha = c*tex[3];  \n  tex[0] = tex[0] + colour[0]*alpha; \n  tex[1] = tex[1] + colour[1]*alpha; \n  tex[2] = tex[2] + colour[2]*alpha; \n  gl_FragColor = vec4(1,1,1,1) * tex;\n}\n"
+      },
+      "glsl3": {
+        "vert": "uniform CCGlobal {\n  vec4 cc_time;\n\n  vec4 cc_screenSize;\n\n  vec4 cc_screenScale;\n\n  vec4 cc_nativeSize;\n\n  mat4 cc_matView;\n  mat4 cc_matViewInv;\n  mat4 cc_matProj;\n  mat4 cc_matProjInv;\n  mat4 cc_matViewProj;\n  mat4 cc_matViewProjInv;\n  vec4 cc_cameraPos;\n\n  vec4 cc_exposure;\n\n  vec4 cc_mainLitDir;\n\n  vec4 cc_mainLitColor;\n\n  vec4 cc_ambientSky;\n  vec4 cc_ambientGround;\n};\n\nprecision highp float;\n\nin vec3 a_position;\n\nin vec2 a_uv0;\n\nout vec2 uv0;\n\nvoid main () {\n  gl_Position = cc_matViewProj * vec4(a_position, 1);\n  uv0 = a_uv0;\n}\n",
+        "frag": "\nprecision highp float;\n\nin vec2 uv0;\nuniform sampler2D texture;\nuniform ARGS {\n  vec4 UVoffset;\n  float u_time;\n  float rotated;\n}\n\nvoid main()\n{\n  float u_time = u_time * .5+5.;\n  vec2 UVnormalize;\n  UVnormalize.x = (uv0.x-UVoffset.x)/(UVoffset.z-UVoffset.x);\n  UVnormalize.y = (uv0.y-UVoffset.y)/(UVoffset.w-UVoffset.y);\n  if(rotated > 0.5)\n  {\n    float temp = UVnormalize.x;\n    UVnormalize.x = UVnormalize.y;\n    UVnormalize.y = 1.0 - temp;\n  }\n\n  vec2 uv = uv0.xy;\n\n  vec2 p = mod(uv*6.12, 6.12)-250.0;\n\n  vec2 i = vec2(p);\n  float c = 1.0;\n  float inten = .0065;\n\n  for (int n = 0; n < 5; n++) \n  {\n    float t =  u_time * (1.0 - (3.5 / float(n+1)));\n    i = p + vec2(cos(t - i.x) + sin(t + i.y), sin(t - i.y) + cos(1.5*t + i.x));\n    c += 1.0/length(vec2(p.x / (cos(i.x+t)/inten),p.y / (cos(i.y+t)/inten)));\n  }\n  c /= float(5);\n  c = 1.17-pow(c, 1.4);\n  vec4 tex = texture2D(texture,uv0);\n  vec3 colour = vec3(pow(abs(c), 20.0));\n  colour = clamp(colour + vec3(0.0, 0.0, .0), 0.0, tex.a);\n\n  float alpha = c*tex[3];  \n  tex[0] = tex[0] + colour[0]*alpha; \n  tex[1] = tex[1] + colour[1]*alpha; \n  tex[2] = tex[2] + colour[2]*alpha; \n  gl_FragColor = vec4(1,1,1,1) * tex;\n}\n"
+      }
+    }
+  ],
+  "subMetas": {}
+}

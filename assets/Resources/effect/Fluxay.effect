@@ -1,0 +1,72 @@
+//流光shader
+CCEffect %{
+  techniques:
+  - passes:
+    - vert: vs
+      frag: fs
+      blendState:
+        targets:
+        - blend: true
+      rasterizerState:
+        cullMode: none
+      properties:
+        texture: { value: white }
+        u_fluxayTexture: { value: white }
+        u_fluxaySpeed: { value: 1.0 }
+        u_startPos: { value: -0.6 }
+        u_UVoffset: { value: [1,0,0,1] }
+        u_rotated: { value: 0 }
+        u_time: { value: 0 }
+}%
+
+CCProgram vs %{
+    #include <cc-global>
+    precision highp float;
+    in vec3 a_position;
+    in vec2 a_uv0;
+    out vec2 uv0;
+    void main () {
+        gl_Position = cc_matViewProj * vec4(a_position, 1);
+        uv0 = a_uv0;
+    }
+}%
+
+CCProgram fs %{
+	precision highp float;
+    in vec2 uv0;
+	uniform sampler2D texture;
+    uniform ARGS {
+        vec4  u_UVoffset;
+        float u_startPos;           //流动的时间
+        float u_rotated;
+        float u_time;
+        float u_fluxaySpeed;
+        sampler2D u_fluxayTexture;  //流光图纹理
+    }
+    void main()
+    {
+        vec2 UVnormalize;
+        UVnormalize.x = (uv0.x-u_UVoffset.x)/(u_UVoffset.z-u_UVoffset.x);
+        UVnormalize.y = (uv0.y-u_UVoffset.y)/(u_UVoffset.w-u_UVoffset.y);
+        if(u_rotated > 0.5)
+        {
+            float temp = UVnormalize.x;
+            UVnormalize.x = UVnormalize.y;
+            UVnormalize.y = 1.0 - temp;
+        }
+
+        vec4 src_color = texture2D(texture, uv0).rgba;
+        //调整第二张图的UV,调整其x使其产生流动效果
+        vec2 flow_uv = vec2(UVnormalize.x,UVnormalize.y);
+        flow_uv.x -= (u_time*u_fluxaySpeed)+u_startPos;
+
+        vec4 src_color1 = texture2D(u_fluxayTexture, flow_uv).rgba;
+        //根据底图是否有颜色来判断是否显示流光
+        if(src_color.a >= 1.0) {
+            gl_FragColor = src_color+src_color1;
+        }
+        else {
+            gl_FragColor = src_color;
+        }
+    }
+}%

@@ -1,0 +1,82 @@
+//高斯模糊效果(在华为P6上不生效)
+
+CCEffect %{
+  techniques:
+  - passes:
+    - vert: vs
+      frag: fs
+      blendState:
+        targets:
+        - blend: true
+      rasterizerState:
+        cullMode: none
+      properties:
+        texture: { value: white }
+        u_degree: { value: 0.03 }
+        u_brightness: { value: 1.0 }
+}%
+
+CCProgram vs %{ // 顶点Shader模块开始
+  #include <cc-global>
+  precision highp float;	  //定义float高精度
+	in vec3 a_position; // 顶点Shader 从渲染管道里面获取的顶点信息,使用attribute来修饰;
+	in vec2 a_uv0;   // 纹理坐标;
+	out vec2 uv0;     // 传递给着色Shader，varying 来修饰，进行插值
+	void main () {
+		gl_Position = cc_matViewProj * vec4(a_position, 1);
+		uv0 = a_uv0;
+	}
+}%
+
+CCProgram fs %{
+  #define repeats 5.  //重复次数，值越大模糊质量越高，但性能越低
+  precision highp float;
+  in vec2 uv0;
+  uniform sampler2D texture;
+  uniform ARGS{
+    float u_degree;     //模糊度，外界属性
+    float u_brightness; //亮度，外界属性
+  }
+
+  // 应用贴图UV
+  vec4 draw(vec2 uv) {
+      return  texture2D(texture,uv).rgba; 
+  }
+
+  float grid(float var, float size) {
+      return floor(var*size)/size;
+  }
+
+  // 降低亮度
+  vec4 dim(vec4 col, float factor) {
+    return vec4(col.r * factor, col.g * factor, col.b * factor, col.a);
+  }
+    
+  // 随机值
+  float rand(vec2 co){
+      return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+  }
+
+  void main()
+  {
+    // 模糊贴图
+    vec4 blurred_image = vec4(0.);
+    // 重复采样
+    for (float i = 0.; i < repeats; i++) { 
+      // 第一采样点
+      vec2 q = vec2(cos(degrees((i/repeats)*360.)),sin(degrees((i/repeats)*360.))) * (rand(vec2(i,uv0.x+uv0.y))+u_degree); 
+      vec2 uv2 = uv0+(q*u_degree);
+      blurred_image += draw(uv2)/2.;
+      // 第二采样点
+      q = vec2(cos(degrees((i/repeats)*360.)),sin(degrees((i/repeats)*360.))) * (rand(vec2(i+2.,uv0.x+uv0.y+24.))+u_degree); 
+      uv2 = uv0+(q*u_degree);
+      blurred_image += draw(uv2)/2.;
+    }
+    // 中和
+    blurred_image /= repeats;
+    // 降低亮度
+    blurred_image = dim(blurred_image, u_brightness);
+    // 导出颜色
+    gl_FragColor = vec4(blurred_image);
+  }
+}%

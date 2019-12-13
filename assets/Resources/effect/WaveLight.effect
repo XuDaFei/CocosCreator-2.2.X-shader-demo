@@ -1,0 +1,82 @@
+//波纹流光
+CCEffect %{
+  techniques:
+  - passes:
+    - vert: vs
+      frag: fs
+      blendState:
+        targets:
+        - blend: true
+      rasterizerState:
+        cullMode: none
+      properties:
+        texture: { value: white }
+        u_time: { value: 0.5 }
+}%
+
+CCProgram vs %{ // 顶点Shader模块开始
+  #include <cc-global>
+  precision highp float;	  //定义float高精度
+	in vec3 a_position; // 顶点Shader 从渲染管道里面获取的顶点信息,使用attribute来修饰;
+	in vec2 a_uv0;   // 纹理坐标;
+	out vec2 uv0;     // 传递给着色Shader，varying 来修饰，进行插值
+	void main () {
+		gl_Position = cc_matViewProj * vec4(a_position, 1);
+		uv0 = a_uv0;
+	}
+}%
+
+CCProgram fs %{
+  #define TAU 6.12
+  #define MAX_ITER 5
+  precision highp float;
+
+  in vec2 uv0;
+  uniform sampler2D texture;
+  uniform ARGS {
+    vec4 UVoffset;
+    float u_time;
+    float rotated;
+  }
+
+  void main()
+  {
+    float u_time = u_time * .5+5.;
+    vec2 UVnormalize;
+    UVnormalize.x = (uv0.x-UVoffset.x)/(UVoffset.z-UVoffset.x);
+    UVnormalize.y = (uv0.y-UVoffset.y)/(UVoffset.w-UVoffset.y);
+    if(rotated > 0.5)
+    {
+      float temp = UVnormalize.x;
+      UVnormalize.x = UVnormalize.y;
+      UVnormalize.y = 1.0 - temp;
+    }
+
+    vec2 uv = uv0.xy;//fragCoord.xy / iResolution.xy;
+    
+    vec2 p = mod(uv*TAU, TAU)-250.0;
+
+    vec2 i = vec2(p);
+    float c = 1.0;
+    float inten = .0065;
+
+    for (int n = 0; n < MAX_ITER; n++) 
+    {
+      float t =  u_time * (1.0 - (3.5 / float(n+1)));
+      i = p + vec2(cos(t - i.x) + sin(t + i.y), sin(t - i.y) + cos(1.5*t + i.x));
+      c += 1.0/length(vec2(p.x / (cos(i.x+t)/inten),p.y / (cos(i.y+t)/inten)));
+    }
+    c /= float(MAX_ITER);
+    c = 1.17-pow(c, 1.4);
+    vec4 tex = texture2D(texture,uv0);
+    vec3 colour = vec3(pow(abs(c), 20.0));
+    colour = clamp(colour + vec3(0.0, 0.0, .0), 0.0, tex.a);
+
+    // 混合波光
+    float alpha = c*tex[3];  
+    tex[0] = tex[0] + colour[0]*alpha; 
+    tex[1] = tex[1] + colour[1]*alpha; 
+    tex[2] = tex[2] + colour[2]*alpha; 
+    gl_FragColor = vec4(1,1,1,1) * tex;
+  }
+}%

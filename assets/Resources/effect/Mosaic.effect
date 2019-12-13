@@ -1,0 +1,48 @@
+//马赛克
+
+CCEffect %{
+  techniques:
+  - passes:
+    - vert: vs
+      frag: fs
+      blendState:
+        targets:
+        - blend: true
+      rasterizerState:
+        cullMode: none
+      properties:
+        texture: { value: white }
+        u_resolution: { value: [1280,720] }
+        u_mosaicSize: { value: 12 }
+}%
+
+CCProgram vs %{
+  #include <cc-global>
+  precision highp float;
+  in vec3 a_position;
+  in vec2 a_uv0;
+  out vec2 uv0;
+  void main () {
+      gl_Position = cc_matViewProj * vec4(a_position, 1);
+      uv0 = a_uv0;
+  }
+}%
+
+CCProgram fs %{
+  precision highp float;
+  in vec2 uv0;
+  uniform sampler2D texture;
+  uniform ARGS {
+    vec2 u_resolution;
+    float u_mosaicSize;
+  }
+  void main(void)
+  {
+      vec4 color;
+      vec2 xy = vec2(uv0.x * u_resolution.x, uv0.y * u_resolution.y);
+      vec2 xyMosaic = vec2(floor(xy.x / u_mosaicSize) * u_mosaicSize, floor(xy.y / u_mosaicSize) * u_mosaicSize);
+      vec2 uvMosaic = vec2(xyMosaic.x / u_resolution.x, xyMosaic.y / u_resolution.y);
+      color = texture2D( texture, uvMosaic);
+      gl_FragColor = color; 
+  }
+}%

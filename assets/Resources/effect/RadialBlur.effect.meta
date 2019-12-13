@@ -1,0 +1,17 @@
+{
+  "ver": "1.0.23",
+  "uuid": "9d24dc19-8d72-483a-903d-914ccf86f169",
+  "compiledShaders": [
+    {
+      "glsl1": {
+        "vert": "uniform mat4 cc_matViewProj;\n\nprecision highp float;\n\nattribute vec3 a_position;\n\nattribute vec2 a_uv0;\n\nvarying vec2 uv0;\n\nvoid main () {\n  gl_Position = cc_matViewProj * vec4(a_position, 1);\n  uv0 = a_uv0;\n}\n",
+        "frag": "\nprecision highp float;\nvarying vec2 uv0;\nuniform sampler2D texture;\nuniform vec2 u_point;\nuniform float u_Strength;\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\n    const int Samples = 64;\n\n    vec2 uv = fragCoord.xy;\n    vec2 dir = (fragCoord.xy-u_point.xy);\n    vec4 color = vec4(0.0,0.0,0.0,0.0);\n    for (int i = 0; i < Samples; i += 2)\n\n    {\n        color += texture2D(texture,uv+float(i)/float(Samples)*dir*u_Strength);\n        color += texture2D(texture,uv+float(i+1)/float(Samples)*dir*u_Strength);\n    }   \n    fragColor = color/float(Samples);\n}\n    \nvoid main(void)\n{\n    mainImage(gl_FragColor, uv0);\n}\n"
+      },
+      "glsl3": {
+        "vert": "uniform CCGlobal {\n  vec4 cc_time;\n\n  vec4 cc_screenSize;\n\n  vec4 cc_screenScale;\n\n  vec4 cc_nativeSize;\n\n  mat4 cc_matView;\n  mat4 cc_matViewInv;\n  mat4 cc_matProj;\n  mat4 cc_matProjInv;\n  mat4 cc_matViewProj;\n  mat4 cc_matViewProjInv;\n  vec4 cc_cameraPos;\n\n  vec4 cc_exposure;\n\n  vec4 cc_mainLitDir;\n\n  vec4 cc_mainLitColor;\n\n  vec4 cc_ambientSky;\n  vec4 cc_ambientGround;\n};\n\nprecision highp float;\n\nin vec3 a_position;\n\nin vec2 a_uv0;\n\nout vec2 uv0;\n\nvoid main () {\n  gl_Position = cc_matViewProj * vec4(a_position, 1);\n  uv0 = a_uv0;\n}\n",
+        "frag": "\nprecision highp float;\nin vec2 uv0;\nuniform sampler2D texture;\nuniform ARGS{\n  vec2 u_resolution;\n  vec2 u_point;\n  float u_Strength;\n}\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n\n    const int Samples = 64;\n\n    vec2 uv = fragCoord.xy;\n    vec2 dir = (fragCoord.xy-u_point.xy);\n    vec4 color = vec4(0.0,0.0,0.0,0.0);\n    for (int i = 0; i < Samples; i += 2)\n\n    {\n        color += texture2D(texture,uv+float(i)/float(Samples)*dir*u_Strength);\n        color += texture2D(texture,uv+float(i+1)/float(Samples)*dir*u_Strength);\n    }   \n    fragColor = color/float(Samples);\n}\n    \nvoid main(void)\n{\n    mainImage(gl_FragColor, uv0);\n}\n"
+      }
+    }
+  ],
+  "subMetas": {}
+}

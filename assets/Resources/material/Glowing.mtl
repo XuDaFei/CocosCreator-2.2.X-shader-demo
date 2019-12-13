@@ -1,0 +1,26 @@
+{
+  "__type__": "cc.Material",
+  "_name": "",
+  "_objFlags": 0,
+  "_native": "",
+  "_effectAsset": {
+    "__uuid__": "0f9457ac-e49b-4ec4-bd74-11b0eabbdb4d"
+  },
+  "_defines": {
+    "IS_Edge_Blur": false,
+    "IS_EdgeGlowing": true,
+    "USE_EDGE_COLOR": true
+  },
+  "_props": {
+    "u_edge": 0.5,
+    "u_offset": 0.1,
+    "u_edgeBlur": 0.1,
+    "u_edgeColor": {
+      "__type__": "cc.Color",
+      "r": 245,
+      "g": 220,
+      "b": 41,
+      "a": 255
+    }
+  }
+}

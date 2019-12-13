@@ -1,0 +1,56 @@
+//溶解特效
+
+ CCEffect %{
+  techniques:
+  - passes:
+    - vert: vs
+      frag: fs
+      blendState:
+        targets:
+        - blend: true
+      rasterizerState:
+        cullMode: none
+      properties:
+        texture: { value: white }
+        u_time: { value: 1.0 }
+}%
+
+CCProgram vs %{
+	#include <cc-global>
+	precision highp float;
+    in vec3 a_position;
+    in vec2 a_uv0;
+    out vec2 uv0;
+    void main () {
+        gl_Position = cc_matViewProj * vec4(a_position, 1);
+        uv0 = a_uv0;
+    }
+}%
+
+CCProgram fs %{
+	precision highp float;		//定义高精度
+	uniform sampler2D texture;	//纹理
+	uniform ARGS {
+		//时间 根据时间计算需要丢弃的像素颜色值范围，也就是溶解的范围
+		float u_time;
+	}
+	in vec2 uv0;
+
+	void main()
+	{
+		float time = u_time;
+		vec4 c = texture2D(texture,uv0);
+		float height = c.g;
+		if(height < time)
+		{
+			//丢弃像素，相当于溶解效果
+			discard;
+		}
+		if(height < time + 0.1) {
+			//这里可以对溶解边缘进行一些处理，比如透明度减少等
+			c.a = c.a-0.1;
+		}
+		//给片元（像素）赋值
+		gl_FragColor = c;
+	}
+}%

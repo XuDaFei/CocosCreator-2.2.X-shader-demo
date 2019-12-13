@@ -1,0 +1,17 @@
+{
+  "ver": "1.0.23",
+  "uuid": "ed4b64c1-0535-4ae5-9648-4acb0a4c0fd8",
+  "compiledShaders": [
+    {
+      "glsl1": {
+        "vert": "uniform mat4 cc_matViewProj;\n\nprecision highp float;\n  attribute vec3 a_position;\n  attribute vec2 a_uv0;\n  varying vec2 uv0;\n  void main () {\n      gl_Position = cc_matViewProj * vec4(a_position, 1);\n      uv0 = a_uv0;\n  }\n",
+        "frag": "\nprecision highp float;\n\nuniform sampler2D texture;\n\nuniform float u_time;\nvarying vec2 uv0;\n\nvoid main()\n{\n  float time = u_time;\n  vec4 c = texture2D(texture,uv0);\n  float height = c.g;\n  if(height < time)\n  {\n\n    discard;\n  }\n  if(height < time + 0.1) {\n\n    c.a = c.a-0.1;\n  }\n\n  gl_FragColor = c;\n}\n"
+      },
+      "glsl3": {
+        "vert": "uniform CCGlobal {\n  vec4 cc_time;\n\n  vec4 cc_screenSize;\n\n  vec4 cc_screenScale;\n\n  vec4 cc_nativeSize;\n\n  mat4 cc_matView;\n  mat4 cc_matViewInv;\n  mat4 cc_matProj;\n  mat4 cc_matProjInv;\n  mat4 cc_matViewProj;\n  mat4 cc_matViewProjInv;\n  vec4 cc_cameraPos;\n\n  vec4 cc_exposure;\n\n  vec4 cc_mainLitDir;\n\n  vec4 cc_mainLitColor;\n\n  vec4 cc_ambientSky;\n  vec4 cc_ambientGround;\n};\n\nprecision highp float;\n  in vec3 a_position;\n  in vec2 a_uv0;\n  out vec2 uv0;\n  void main () {\n      gl_Position = cc_matViewProj * vec4(a_position, 1);\n      uv0 = a_uv0;\n  }\n",
+        "frag": "\nprecision highp float;\n\nuniform sampler2D texture;\n\nuniform ARGS {\n\n  float u_time;\n}\nin vec2 uv0;\n\nvoid main()\n{\n  float time = u_time;\n  vec4 c = texture2D(texture,uv0);\n  float height = c.g;\n  if(height < time)\n  {\n\n    discard;\n  }\n  if(height < time + 0.1) {\n\n    c.a = c.a-0.1;\n  }\n\n  gl_FragColor = c;\n}\n"
+      }
+    }
+  ],
+  "subMetas": {}
+}

@@ -1,0 +1,17 @@
+{
+  "ver": "1.0.23",
+  "uuid": "14e64f7c-87c8-459a-ad37-6c773ceea4e6",
+  "compiledShaders": [
+    {
+      "glsl1": {
+        "vert": "uniform mat4 cc_matViewProj;\n\nprecision highp float;\n\nattribute vec3 a_position;\n\nattribute vec2 a_uv0;\n\nvarying vec2 uv0;\n\nvoid main () {\n  vec4 pos = cc_matViewProj * vec4(a_position, 1);\n  gl_Position = pos;\n  uv0 = a_uv0;\n}\n",
+        "frag": "\nprecision mediump float;\nvarying vec2 uv0;\nuniform sampler2D texture;\nuniform vec2 u_resolution;\nconst float blurRadius = 7.0;\nvoid main()\n{\n  vec2 unit = 1.0 / u_resolution;\n\n  vec3 sumColor = vec3(0.0, 0.0, 0.0);\n  float count = 0.0;\n  vec4 col = vec4(0.0);\n  for(float fy = -blurRadius; fy <= blurRadius; ++fy)\n  {\n    for(float fx = -blurRadius; fx <= blurRadius; ++fx)\n    {   \n      float weight = (blurRadius - abs(fx)) * (blurRadius - abs(fy));\n\n      col += texture2D(texture, uv0 + vec2(fx * unit.x, fy * unit.y)) * weight;\n      count += weight;\n    }\n  }\n  col.a = texture2D(texture, uv0).a;\n  gl_FragColor = vec4(col.rgb / count, col.a);\n}\n"
+      },
+      "glsl3": {
+        "vert": "uniform CCGlobal {\n  vec4 cc_time;\n\n  vec4 cc_screenSize;\n\n  vec4 cc_screenScale;\n\n  vec4 cc_nativeSize;\n\n  mat4 cc_matView;\n  mat4 cc_matViewInv;\n  mat4 cc_matProj;\n  mat4 cc_matProjInv;\n  mat4 cc_matViewProj;\n  mat4 cc_matViewProjInv;\n  vec4 cc_cameraPos;\n\n  vec4 cc_exposure;\n\n  vec4 cc_mainLitDir;\n\n  vec4 cc_mainLitColor;\n\n  vec4 cc_ambientSky;\n  vec4 cc_ambientGround;\n};\n\nprecision highp float;\n\nin vec3 a_position;\n\nin vec2 a_uv0;\n\nout vec2 uv0;\n\nvoid main () {\n  vec4 pos = cc_matViewProj * vec4(a_position, 1);\n  gl_Position = pos;\n  uv0 = a_uv0;\n}\n",
+        "frag": "\nprecision mediump float;\nin vec2 uv0;\nuniform sampler2D texture;\nuniform ARGS {\n  vec2 u_resolution;\n  float strength;\n}\nconst float blurRadius = 7.0;\nvoid main()\n{\n  vec2 unit = 1.0 / u_resolution;\n\n  vec3 sumColor = vec3(0.0, 0.0, 0.0);\n  float count = 0.0;\n  vec4 col = vec4(0.0);\n  for(float fy = -blurRadius; fy <= blurRadius; ++fy)\n  {\n    for(float fx = -blurRadius; fx <= blurRadius; ++fx)\n    {   \n      float weight = (blurRadius - abs(fx)) * (blurRadius - abs(fy));\n\n      col += texture2D(texture, uv0 + vec2(fx * unit.x, fy * unit.y)) * weight;\n      count += weight;\n    }\n  }\n  col.a = texture2D(texture, uv0).a;\n  gl_FragColor = vec4(col.rgb / count, col.a);\n}\n"
+      }
+    }
+  ],
+  "subMetas": {}
+}

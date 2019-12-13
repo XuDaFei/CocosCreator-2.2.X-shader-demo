@@ -1,0 +1,58 @@
+//高斯模糊2
+
+CCEffect %{
+  techniques:
+  - passes:
+    - vert: vs
+      frag: fs
+      blendState:
+        targets:
+        - blend: true
+      rasterizerState:
+        cullMode: none
+      properties:
+        texture: { value: white }
+        u_resolution: { value: [1280,720] }
+}%
+
+CCProgram vs %{
+  #include <cc-global>
+  precision highp float;	      // 定义float高精度
+	in vec3 a_position;    // 顶点Shader 从渲染管道里面获取的顶点信息,使用attribute来修饰;
+	in vec2 a_uv0;         // 纹理坐标;
+	out vec2 uv0;             // 传递给着色Shader，varying 来修饰，进行插值
+	void main () {
+		vec4 pos = cc_matViewProj * vec4(a_position, 1);
+		gl_Position = pos;
+		uv0 = a_uv0;
+	}
+}%
+
+CCProgram fs %{
+  precision mediump float;
+  in vec2 uv0;
+  uniform sampler2D texture;
+  uniform ARGS {
+    vec2 u_resolution;
+    float strength;
+  }
+  const float blurRadius = 7.0;
+  void main()
+  {
+    vec2 unit = 1.0 / u_resolution; //单位坐标
+    vec3 sumColor = vec3(0.0, 0.0, 0.0);
+    float count = 0.0;
+    vec4 col = vec4(0.0);
+    for(float fy = -blurRadius; fy <= blurRadius; ++fy)
+    {
+      for(float fx = -blurRadius; fx <= blurRadius; ++fx)
+      {   
+        float weight = (blurRadius - abs(fx)) * (blurRadius - abs(fy)); //权重，p点的权重最高，向四周依次减少
+        col += texture2D(texture, uv0 + vec2(fx * unit.x, fy * unit.y)) * weight;
+        count += weight;
+      }
+    }
+    col.a = texture2D(texture, uv0).a;
+    gl_FragColor = vec4(col.rgb / count, col.a);
+  }
+}%

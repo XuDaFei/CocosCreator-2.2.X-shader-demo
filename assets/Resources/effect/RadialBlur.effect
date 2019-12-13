@@ -1,0 +1,60 @@
+//径向模糊
+
+CCEffect %{
+  techniques:
+  - passes:
+    - vert: vs
+      frag: fs
+      blendState:
+        targets:
+        - blend: true
+      rasterizerState:
+        cullMode: none
+      properties:
+        texture: { value: white }
+        u_point: { value: [0.5, 0.5] }
+        u_resolution: { value: [1280, 720] }
+        u_Strength: { value: 0.125 }
+}%
+
+CCProgram vs %{ // 顶点Shader模块开始
+  #include <cc-global>
+  precision highp float;	  //定义float高精度
+	in vec3 a_position; // 顶点Shader 从渲染管道里面获取的顶点信息,使用attribute来修饰;
+	in vec2 a_uv0;   // 纹理坐标;
+	out vec2 uv0;     // 传递给着色Shader，varying 来修饰，进行插值
+	void main () {
+		gl_Position = cc_matViewProj * vec4(a_position, 1);
+		uv0 = a_uv0;
+	}
+}%
+
+CCProgram fs %{
+  precision highp float;
+  in vec2 uv0;
+  uniform sampler2D texture;
+  uniform ARGS{
+    vec2 u_resolution;
+    vec2 u_point;
+    float u_Strength;
+  }
+  void mainImage( out vec4 fragColor, in vec2 fragCoord )
+  {
+      // const float u_Strength = 0.125;    
+      const int Samples = 64; //multiple of 2
+      vec2 uv = fragCoord.xy;
+      vec2 dir = (fragCoord.xy-u_point.xy);
+      vec4 color = vec4(0.0,0.0,0.0,0.0);
+      for (int i = 0; i < Samples; i += 2) //operating at 2 samples for better performance
+      {
+          color += texture2D(texture,uv+float(i)/float(Samples)*dir*u_Strength);
+          color += texture2D(texture,uv+float(i+1)/float(Samples)*dir*u_Strength);
+      }   
+      fragColor = color/float(Samples);
+  }
+      
+  void main(void)
+  {
+      mainImage(gl_FragColor, uv0);
+  }
+}%

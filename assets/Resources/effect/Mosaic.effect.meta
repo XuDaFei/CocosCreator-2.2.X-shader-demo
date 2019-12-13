@@ -1,0 +1,17 @@
+{
+  "ver": "1.0.23",
+  "uuid": "8b12cd41-6673-45b2-8e81-f77078e331b4",
+  "compiledShaders": [
+    {
+      "glsl1": {
+        "vert": "uniform mat4 cc_matViewProj;\n\nprecision highp float;\nattribute vec3 a_position;\nattribute vec2 a_uv0;\nvarying vec2 uv0;\nvoid main () {\n    gl_Position = cc_matViewProj * vec4(a_position, 1);\n    uv0 = a_uv0;\n}\n",
+        "frag": "\nprecision highp float;\nvarying vec2 uv0;\nuniform sampler2D texture;\nuniform vec2 u_resolution;\nuniform float u_mosaicSize;\nvoid main(void)\n{\n    vec4 color;\n    vec2 xy = vec2(uv0.x * u_resolution.x, uv0.y * u_resolution.y);\n    vec2 xyMosaic = vec2(floor(xy.x / u_mosaicSize) * u_mosaicSize, floor(xy.y / u_mosaicSize) * u_mosaicSize);\n    vec2 uvMosaic = vec2(xyMosaic.x / u_resolution.x, xyMosaic.y / u_resolution.y);\n    color = texture2D( texture, uvMosaic);\n    gl_FragColor = color; \n}\n"
+      },
+      "glsl3": {
+        "vert": "uniform CCGlobal {\n  vec4 cc_time;\n\n  vec4 cc_screenSize;\n\n  vec4 cc_screenScale;\n\n  vec4 cc_nativeSize;\n\n  mat4 cc_matView;\n  mat4 cc_matViewInv;\n  mat4 cc_matProj;\n  mat4 cc_matProjInv;\n  mat4 cc_matViewProj;\n  mat4 cc_matViewProjInv;\n  vec4 cc_cameraPos;\n\n  vec4 cc_exposure;\n\n  vec4 cc_mainLitDir;\n\n  vec4 cc_mainLitColor;\n\n  vec4 cc_ambientSky;\n  vec4 cc_ambientGround;\n};\n\nprecision highp float;\nin vec3 a_position;\nin vec2 a_uv0;\nout vec2 uv0;\nvoid main () {\n    gl_Position = cc_matViewProj * vec4(a_position, 1);\n    uv0 = a_uv0;\n}\n",
+        "frag": "\nprecision highp float;\nin vec2 uv0;\nuniform sampler2D texture;\nuniform ARGS {\n  vec2 u_resolution;\n  float u_mosaicSize;\n}\nvoid main(void)\n{\n    vec4 color;\n    vec2 xy = vec2(uv0.x * u_resolution.x, uv0.y * u_resolution.y);\n    vec2 xyMosaic = vec2(floor(xy.x / u_mosaicSize) * u_mosaicSize, floor(xy.y / u_mosaicSize) * u_mosaicSize);\n    vec2 uvMosaic = vec2(xyMosaic.x / u_resolution.x, xyMosaic.y / u_resolution.y);\n    color = texture2D( texture, uvMosaic);\n    gl_FragColor = color; \n}\n"
+      }
+    }
+  ],
+  "subMetas": {}
+}

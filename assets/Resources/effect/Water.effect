@@ -1,0 +1,72 @@
+//水波纹效果
+CCEffect %{
+  techniques:
+  - passes:
+    - vert: vs
+      frag: fs
+      blendState:
+        targets:
+        - blend: true
+      rasterizerState:
+        cullMode: none
+      properties:
+        texture: { value: white }
+        u_resolution: { value: [1280,720] }
+        u_time: { value: 1.0 }
+}%
+
+CCProgram vs %{ // 顶点Shader模块开始
+  #include <cc-global>
+  precision highp float;	  //定义float高精度
+	in vec3 a_position; // 顶点Shader 从渲染管道里面获取的顶点信息,使用attribute来修饰;
+	in vec2 a_uv0;   // 纹理坐标;
+	out vec2 uv0;     // 传递给着色Shader，varying 来修饰，进行插值
+	void main () {
+		gl_Position = cc_matViewProj * vec4(a_position, 1);
+		uv0 = a_uv0;
+	}
+}%
+
+CCProgram fs %{
+  precision highp float;
+  in vec2 uv0;
+  uniform sampler2D texture;
+  uniform ARGS {
+    vec4 UVoffset;
+    vec2 u_resolution;
+    float u_time;
+    float rotated;
+  }
+
+  #define F cos(x-y)*cos(y),sin(x+y)*sin(y)
+
+  vec2 s(vec2 p)
+  {
+    float d=u_time*0.2,x=8.*(p.x+d),y=8.*(p.y+d);
+    return vec2(F);
+  }
+  void mainImage( out vec4 fragColor, in vec2 fragCoord )
+  {
+    // 换成resolution
+    vec2 rs = u_resolution.xy;
+    // 换成纹理坐标v_texCoord.xy
+    vec2 uv = fragCoord;
+    vec2 q = uv+2./u_resolution.x*(s(uv)-s(uv+rs));
+    //反转y
+    //q.y=1.-q.y;
+    fragColor = texture2D(texture, q);
+  }
+  void main()
+  {
+    vec2 UVnormalize;
+    UVnormalize.x = (uv0.x-UVoffset.x)/(UVoffset.z-UVoffset.x);
+    UVnormalize.y = (uv0.y-UVoffset.y)/(UVoffset.w-UVoffset.y);
+    if(rotated > 0.5)
+    {
+      float temp = UVnormalize.x;
+      UVnormalize.x = UVnormalize.y;
+      UVnormalize.y = 1.0 - temp;
+    }
+    mainImage(gl_FragColor, uv0.xy);
+  }
+}%

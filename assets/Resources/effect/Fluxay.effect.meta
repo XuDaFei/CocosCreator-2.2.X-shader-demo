@@ -1,0 +1,17 @@
+{
+  "ver": "1.0.23",
+  "uuid": "d65ecfab-7310-4b95-8db8-371104329878",
+  "compiledShaders": [
+    {
+      "glsl1": {
+        "vert": "uniform mat4 cc_matViewProj;\n\nprecision highp float;\nattribute vec3 a_position;\nattribute vec2 a_uv0;\nvarying vec2 uv0;\nvoid main () {\n    gl_Position = cc_matViewProj * vec4(a_position, 1);\n    uv0 = a_uv0;\n}\n",
+        "frag": "\nprecision highp float;\n  varying vec2 uv0;\nuniform sampler2D texture;\n  uniform vec4 u_UVoffset;\nuniform float u_startPos;\nuniform float u_rotated;\nuniform float u_time;\nuniform float u_fluxaySpeed;\nuniform sampler2D u_fluxayTexture;\nvoid main()\n  {\n      vec2 UVnormalize;\n      UVnormalize.x = (uv0.x-u_UVoffset.x)/(u_UVoffset.z-u_UVoffset.x);\n      UVnormalize.y = (uv0.y-u_UVoffset.y)/(u_UVoffset.w-u_UVoffset.y);\n      if(u_rotated > 0.5)\n      {\n          float temp = UVnormalize.x;\n          UVnormalize.x = UVnormalize.y;\n          UVnormalize.y = 1.0 - temp;\n      }\n\n      vec4 src_color = texture2D(texture, uv0).rgba;\n\n      vec2 flow_uv = vec2(UVnormalize.x,UVnormalize.y);\n      flow_uv.x -= (u_time*u_fluxaySpeed)+u_startPos;\n\n      vec4 src_color1 = texture2D(u_fluxayTexture, flow_uv).rgba;\n\n      if(src_color.a >= 1.0) {\n          gl_FragColor = src_color+src_color1;\n      }\n      else {\n          gl_FragColor = src_color;\n      }\n  }\n"
+      },
+      "glsl3": {
+        "vert": "uniform CCGlobal {\n  vec4 cc_time;\n\n  vec4 cc_screenSize;\n\n  vec4 cc_screenScale;\n\n  vec4 cc_nativeSize;\n\n  mat4 cc_matView;\n  mat4 cc_matViewInv;\n  mat4 cc_matProj;\n  mat4 cc_matProjInv;\n  mat4 cc_matViewProj;\n  mat4 cc_matViewProjInv;\n  vec4 cc_cameraPos;\n\n  vec4 cc_exposure;\n\n  vec4 cc_mainLitDir;\n\n  vec4 cc_mainLitColor;\n\n  vec4 cc_ambientSky;\n  vec4 cc_ambientGround;\n};\n\nprecision highp float;\nin vec3 a_position;\nin vec2 a_uv0;\nout vec2 uv0;\nvoid main () {\n    gl_Position = cc_matViewProj * vec4(a_position, 1);\n    uv0 = a_uv0;\n}\n",
+        "frag": "\nprecision highp float;\n  in vec2 uv0;\nuniform sampler2D texture;\n  uniform ARGS {\n      vec4  u_UVoffset;\n      float u_startPos;\n\n      float u_rotated;\n      float u_time;\n      float u_fluxaySpeed;\n      sampler2D u_fluxayTexture;\n\n  }\n  void main()\n  {\n      vec2 UVnormalize;\n      UVnormalize.x = (uv0.x-u_UVoffset.x)/(u_UVoffset.z-u_UVoffset.x);\n      UVnormalize.y = (uv0.y-u_UVoffset.y)/(u_UVoffset.w-u_UVoffset.y);\n      if(u_rotated > 0.5)\n      {\n          float temp = UVnormalize.x;\n          UVnormalize.x = UVnormalize.y;\n          UVnormalize.y = 1.0 - temp;\n      }\n\n      vec4 src_color = texture2D(texture, uv0).rgba;\n\n      vec2 flow_uv = vec2(UVnormalize.x,UVnormalize.y);\n      flow_uv.x -= (u_time*u_fluxaySpeed)+u_startPos;\n\n      vec4 src_color1 = texture2D(u_fluxayTexture, flow_uv).rgba;\n\n      if(src_color.a >= 1.0) {\n          gl_FragColor = src_color+src_color1;\n      }\n      else {\n          gl_FragColor = src_color;\n      }\n  }\n"
+      }
+    }
+  ],
+  "subMetas": {}
+}
